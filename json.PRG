@@ -169,19 +169,19 @@
 	#DEFINE	VFP_JSON_MSG_005			"No se especifica el tipo de columna."
 	#DEFINE	VFP_JSON_MSG_006			"No se especifica la longitud de la columna."
 	#DEFINE	VFP_JSON_MSG_007			"El nombre de columna especificado ya existe."
-	#DEFINE	VFP_JSON_MSG_008			"Tipo de columna no v·lida."
+	#DEFINE	VFP_JSON_MSG_008			"Tipo de columna no v√°lida."
 	#DEFINE	VFP_JSON_MSG_009			"No se especifica la estructura de columnas."
 	#DEFINE	VFP_JSON_MSG_010			"El nombre del cursor no se especifica."
-	#DEFINE	VFP_JSON_MSG_011			"El nombre del cursor no est· en uso."
-	#DEFINE	VFP_JSON_MSG_012			"El esquema de cadenas no est· especificado."
-	#DEFINE	VFP_JSON_MSG_013			"La cadena JSON proporcionada no est· bien formateada (nombre de atributo no v·lido)"
+	#DEFINE	VFP_JSON_MSG_011			"El nombre del cursor no est√° en uso."
+	#DEFINE	VFP_JSON_MSG_012			"El esquema de cadenas no est√° especificado."
+	#DEFINE	VFP_JSON_MSG_013			"La cadena JSON proporcionada no est√° bien formateada (nombre de atributo no v√°lido)"
 	#DEFINE VFP_JSON_MSG_014			"Cadena JSON desequilibrada"
-	#DEFINE	VFP_JSON_MSG_015			"La cadena JSON proporcionada no est· bien formateada (nombre de variable no v·lido)"
-	#DEFINE VFP_JSON_MSG_016			"La cadena JSON proporcionada no representa un objeto de cursor v·lido"
-	#DEFINE VFP_JSON_MSG_017			"Par·metro que falta"
-	#DEFINE VFP_JSON_MSG_018			"Par·metro no v·lido"
-	#DEFINE VFP_JSON_MSG_019			"La cadena JSON suministrada no est· bien formateada"
-	#DEFINE VFP_JSON_MSG_020			"El esquema est· vacÌo"
+	#DEFINE	VFP_JSON_MSG_015			"La cadena JSON proporcionada no est√° bien formateada (nombre de variable no v√°lido)"
+	#DEFINE VFP_JSON_MSG_016			"La cadena JSON proporcionada no representa un objeto de cursor v√°lido"
+	#DEFINE VFP_JSON_MSG_017			"Par√°metro que falta"
+	#DEFINE VFP_JSON_MSG_018			"Par√°metro no v√°lido"
+	#DEFINE VFP_JSON_MSG_019			"La cadena JSON suministrada no est√° bien formateada"
+	#DEFINE VFP_JSON_MSG_020			"El esquema est√° vac√≠o"
 	#DEFINE VFP_JSON_MSG_021			"El JSON proporcionado no es un array de objetos"
 	#DEFINE VFP_JSON_MSG_022			"El alias ya existe"
 #ENDIF
@@ -1504,7 +1504,7 @@ DEFINE CLASS json AS Custom
 	* Check if the given char is alphabetic
 	*
 	PROCEDURE isAlpha(pcChar)
-	 RETURN UPPER(pcChar) $ "ABCDEFGHIJKLMN—OPQRSTUVWXYZ_"
+	 RETURN UPPER(pcChar) $ "ABCDEFGHIJKLMN√ëOPQRSTUVWXYZ_"
 	ENDPROC
 	
 	
@@ -2414,7 +2414,37 @@ if (typeof JSON !== "object") {
 // James Su·rez 26-11-2022
 // add prototype item function 
 
-				Object.prototype.item = function(index) { return this[index] }
+				function goodParse(obj){
+					if(obj && typeof obj == "object"){
+						if(!(obj instanceof Array)){
+							for(var id in obj){
+								if(id.toUpperCase() == "ITEM"){								
+									// ocultar la variable
+									obj["...." + id] = obj[id]
+									delete obj[id]
+								}
+								else{
+									var value = obj[id]
+									if(typeof value == "object"){
+										goodParse(value)
+									}
+								}
+							}
+						}
+					}
+					return obj 
+				}
+
+				
+				goodParse(j)
+				Object.prototype.item = function() {
+					var index = arguments[0]
+					if(index === undefined || index === null) index = "....item"					
+					if(typeof index == "string" && index.toUpperCase()=="ITEM"){
+						index= "...." + index
+					}
+					return this[index]
+				}
 
 // In the optional fourth stage, we recursively walk the new structure, passing
 // each name/value pair to a reviver function for possible transformation.
